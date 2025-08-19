@@ -1,0 +1,29 @@
+@import url('https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.5.0/remixicon.min.css');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+.swiper-button-prev,
+.swiper-button-next {
+  color: #a87333 !important; /* Custom arrow color */
+  transition: color 0.3s ease;
+}
+
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+  color: #b8884d !important; /* Hover color */
+}
+
+/* Pagination dots */
+  .swiper-pagination-bullet {
+    background-color: #d6a400 !important; /* Inactive dot color */
+    opacity: 0.6;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .swiper-pagination-bullet-active {
+    background-color: #a87333 !important; /* Active dot color */
+    opacity: 1;
+    transform: scale(1.2); /* Slightly bigger when active */
+  }

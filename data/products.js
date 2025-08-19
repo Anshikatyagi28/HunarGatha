@@ -1,0 +1,80 @@
+export const bestsellingProducts = [
+  {
+    id: 1,
+    name: "Royal Kannauj Itar Set",
+    artisan: "Ustad Gulzar Ahmed",
+    district: "Kannauj",
+    price: 2499,
+    originalPrice: 3200,
+    rating: 4.8,
+    reviews: 127,
+    image: "https://images.pexels.com/photos/6621462/pexels-photo-6621462.jpeg?auto=compress&cs=tinysrgb&w=800",
+    verified: true,
+    story: "Crafted using 400-year-old traditional distillation techniques"
+  },
+  {
+    id: 2,
+    name: "Handmade Leather Portfolio",
+    artisan: "Ramesh Kumar",
+    district: "Kanpur",
+    price: 1899,
+    originalPrice: 2400,
+    rating: 4.9,
+    reviews: 89,
+    image: "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=800",
+    verified: true,
+    story: "Each piece hand-stitched by master craftsmen"
+  },
+  {
+    id: 3,
+    name: "Chikankari Kurta Set",
+    artisan: "Fatima Begum",
+    district: "Lucknow",
+    price: 3299,
+    originalPrice: 4100,
+    rating: 4.7,
+    reviews: 156,
+    image: "https://images.pexels.com/photos/7679720/pexels-photo-7679720.jpeg?auto=compress&cs=tinysrgb&w=800",
+    verified: true,
+    story: "Traditional shadow work embroidery on pure cotton"
+  },
+  {
+    id: 4,
+    name: "Banarasi Silk Saree",
+    artisan: "Vishnu Prasad",
+    district: "Varanasi",
+    price: 8999,
+    originalPrice: 12000,
+    rating: 4.9,
+    reviews: 203,
+    image: "https://images.pexels.com/photos/7135057/pexels-photo-7135057.jpeg?auto=compress&cs=tinysrgb&w=800",
+    verified: true,
+    story: "Woven with real gold threads using ancestral techniques"
+  },
+  {
+    id: 5,
+    name: "Blue Pottery Dinner Set",
+    artisan: "Kripal Singh",
+    district: "Jaipur",
+    price: 4599,
+    originalPrice: 5800,
+    rating: 4.6,
+    reviews: 94,
+    image: "https://images.pexels.com/photos/6195049/pexels-photo-6195049.jpeg?auto=compress&cs=tinysrgb&w=800",
+    verified: true,
+    story: "Hand-painted motifs inspired by Mughal gardens"
+  },
+  {
+    id: 6,
+    name: "Brass Handicraft Set",
+    artisan: "Mohan Lal",
+    district: "Moradabad",
+    price: 1799,
+    originalPrice: 2300,
+    rating: 4.5,
+    reviews: 67,
+    image: "https://images.pexels.com/photos/6193512/pexels-photo-6193512.jpeg?auto=compress&cs=tinysrgb&w=800",
+    verified: true,
+    story: "Etched and engraved using traditional hammering techniques"
+  }
+];
