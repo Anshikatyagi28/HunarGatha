@@ -194,6 +194,21 @@ const LoginForm = () => {
           <span>Continue with Google</span>
         </motion.button>
 
+{/* checkbox */}
+<div className="flex items-start">
+                <input type="checkbox" className="mr-2 mt-1" required />
+                <span className="text-sm text-muted-foreground">
+                  I agree to the{' '}
+                  <Link href="/terms" className="text-gaatha-terracotta hover:underline">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy" className="text-gaatha-terracotta hover:underline">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </div>
+
         {/* Signup link */}
         <p className="text-center text-sm text-[#3A3A3A]">
           Don&apos;t have an account?{" "}

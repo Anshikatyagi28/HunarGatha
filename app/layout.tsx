@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/section/Navbar";
 import Footer from "@/components/section/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "react-hot-toast";
 
 
 const pacifico = Pacifico({
@@ -51,6 +52,10 @@ export const metadata: Metadata = {
   title: "Hunar Gaatha - Crafting Culture, One Tale at a Time",
   description:
     "Discover authentic Indian crafts and the stories behind them. Connect with artisans and their timeless traditions.",
+     icons: {
+      icon: "/favicon.ico"
+    // apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -63,12 +68,14 @@ export default function RootLayout({
       <body 
         className={`${playfair.variable} ${eb_garamond.variable} ${dancing_script.variable} antialiased bg-amber-50`}
       >
-        <Navbar />  
-        <AuthProvider> 
+        
+       <Navbar/>
+       <Toaster position="top-right" reverseOrder={false} />
+        <AuthProvider>
         {children}
-        </AuthProvider>  
+        </AuthProvider>
         <Footer />
       </body>
     </html>
   );
-} ;
+}

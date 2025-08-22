@@ -2,8 +2,6 @@
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// Import icons from react-icons
 import {
   FaHome,
   FaMapMarkerAlt,
@@ -14,7 +12,6 @@ import {
   FaUsers,
   FaAward,
   FaBriefcase,
-  FaHandshake,
   FaPhone,
   FaSearch,
   FaShoppingCart,
@@ -33,17 +30,11 @@ import {
   GiShop
 } from 'react-icons/gi';
 import { FiMap } from 'react-icons/fi';
-
 import useCartStore from '@/stores/cartStore';
 import useWishlistStore from '@/stores/wishlistStore';
-
-// Import Firebase Auth and Firestore functions
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { collection, onSnapshot } from 'firebase/firestore';
-
-// Mock auth hook is replaced by real Firebase logic
-// const useAuth = () => ({ ... });
 
 // Nav items with icon references
 const navItems = [
@@ -54,7 +45,7 @@ const navItems = [
   },
   {
     name: 'Shop',
-    href: '/shop',
+    href: '/store/shop',
     icon: GiShop,
   },
   {
@@ -94,7 +85,6 @@ const navItems = [
       { name: 'Who we are', href: '/about', icon: FaUsers },
       { name: 'Our Values', href: '/about/values', icon: FaAward },
       { name: 'What We do', href: '/about/whatwedo', icon: FaBriefcase },
-      // { name: 'Be a Part', href: '/about/beapart', icon: FaHandshake },
       { name: 'Contact Us', href: '/contact', icon: FaPhone },
     ],
   },
@@ -104,7 +94,6 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   // Firebase state management
@@ -112,51 +101,25 @@ export default function Navbar() {
   const [cartCount, setCartCount] = useState(0);
 
   const dropdownRef = useRef(null);
-  const cartRef = useRef(null);
   const userRef = useRef(null);
-
+  
+  // Use Zustand store for cart data
+  const { getItemCount } = useCartStore();
   const { items: wishlistItems } = useWishlistStore();
 
-  // New useEffect hook to handle Firebase Auth and Firestore
   useEffect(() => {
+    // This effect is now only for Firebase user state, not the cart logic.
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-
-      if (currentUser) {
-        // Listen to cart changes for the logged-in user
-        const cartRef = collection(db, "users", currentUser.uid, "cart");
-        const unsubscribeCart = onSnapshot(cartRef, (snapshot) => {
-          setCartCount(snapshot.size);
-        });
-        // Cleanup listener on component unmount or user change
-        return () => unsubscribeCart();
-      } else {
-        setCartCount(0);
-      }
     });
 
-    // Cleanup auth listener on component unmount
     return () => unsubscribeAuth();
   }, []);
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      // Ensure the dropdown closes after logging out
-      setIsUserDropdownOpen(false);
-      console.log('User logged out successfully.');
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setActiveDropdown(null);
-      }
-      if (cartRef.current && !cartRef.current.contains(event.target)) {
-        setIsCartOpen(false);
       }
       if (userRef.current && !userRef.current.contains(event.target)) {
         setIsUserDropdownOpen(false);
@@ -166,16 +129,19 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleCartClick = (event) => {
-    event.stopPropagation();
-    setIsCartOpen(!isCartOpen);
-    setIsUserDropdownOpen(false);
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setIsUserDropdownOpen(false);
+      console.log('User logged out successfully.');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   const handleUserClick = (event) => {
     event.stopPropagation();
     setIsUserDropdownOpen(!isUserDropdownOpen);
-    setIsCartOpen(false);
   };
 
   return (
@@ -186,7 +152,6 @@ export default function Navbar() {
           <Link href="/" className="flex items-center">
             <span className="font-['Pacifico'] text-2xl text-[#B66E41]">HunarGaatha</span>
           </Link>
-
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center space-x-2" onMouseLeave={() => setActiveDropdown(null)}>
@@ -200,22 +165,14 @@ export default function Navbar() {
                 >
                   <Link
                     href={item.href}
-                    // The 'group' class is now on the Link itself to isolate the hover effect
                     className="group flex items-center space-x-2 px-2 py-2 border-r-400 text-sm font-medium text-[#3A3A3A] hover:text-[#B66E41] hover:bg-[#F8F3EC] transition-colors relative"
                   >
                     <span className="text-lg">
                       <Icon />
                     </span>
                     <span>{item.name}</span>
-                    {item.dropdown && (
-                      <FaChevronDown className={`w-3 h-3 transition-transform duration-200 ${activeDropdown === item.name ? 'rotate-180' : ''}`} />
-                    )}
-                    {/* Corrected hover line effect: starts at left-0 and grows right */}
                     <span className="absolute bottom-0 left-1/2 w-0 h-0.5 bg-[#B66E41] transition-all duration-300 transform -translate-x-1/2 group-hover:w-full"></span>
-
                   </Link>
-
-                  {/* Dropdown Menu */}
                   <AnimatePresence>
                     {item.dropdown && activeDropdown === item.name && (
                       <motion.div
@@ -223,7 +180,7 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute top-full left-0 mt-2 w-64 bg-white  shadow-xl border border-gray-100 py-2 z-50"
+                        className="absolute top-full left-0 mt-2 w-64 bg-white shadow-xl border border-gray-100 py-2 z-50"
                         ref={dropdownRef}
                       >
                         {item.dropdown.map((dropdownItem, index) => {
@@ -232,7 +189,6 @@ export default function Navbar() {
                             <Link
                               key={index}
                               href={dropdownItem.href}
-                              // The 'group' class is also on this Link component
                               className="group relative flex items-center space-x-3 px-4 py-3 text-sm text-[#3A3A3A] hover:bg-[#F8F3EC] hover:text-[#B66E41] transition-colors"
                               onClick={() => setActiveDropdown(null)}
                             >
@@ -240,7 +196,6 @@ export default function Navbar() {
                                 <DropIcon />
                               </span>
                               <span>{dropdownItem.name}</span>
-                              {/* Corrected hover line effect for dropdown items */}
                               <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#B66E41] transition-all duration-300 group-hover:w-[90%]"></span>
                             </Link>
                           );
@@ -252,7 +207,6 @@ export default function Navbar() {
               );
             })}
           </nav>
-
 
           {/* Search, Cart, Profile Icons */}
           <div className="flex items-center space-x-4">
@@ -279,7 +233,7 @@ export default function Navbar() {
 
             {/* Wishlist */}
             <Link
-              href="/wishlist"
+              href="/store/wishlist"
               className="relative w-10 h-10 flex items-center justify-center text-[#3A3A3A] hover:text-[#B66E41] cursor-pointer"
             >
               <FaHeart className="text-xl" />
@@ -290,47 +244,18 @@ export default function Navbar() {
               )}
             </Link>
 
-            {/* Cart Dropdown */}
-            <div className="relative" ref={cartRef}>
-              <button
-                onClick={handleCartClick}
-                className="relative w-10 h-10 flex items-center justify-center text-[#3A3A3A] hover:text-[#B66E41] cursor-pointer"
-              >
-                <FaShoppingCart className="text-xl" />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-[#D6A400] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-
-              <AnimatePresence>
-                {isCartOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute right-0 mt-2 w-80 bg-white  shadow-xl border border-gray-100 py-2 z-50"
-                  >
-                    <div className="px-4 py-2 border-b">
-                      <h3 className="font-semibold text-lg">Your Cart</h3>
-                    </div>
-                    {/* The cart dropdown logic now needs to be adjusted to fetch from Firebase Firestore or your state management if not using a real-time store */}
-                    {/* For this example, we'll assume the cartStore still works and the count is updated separately */}
-                    {cartCount > 0 ? (
-                      <div className="px-4 py-3 text-center text-gray-500">
-                        {/* You would map over your Firebase cart items here */}
-                        Items in cart: {cartCount}
-                      </div>
-                    ) : (
-                      <div className="px-4 py-3 text-center text-gray-500">
-                        Your cart is empty.
-                      </div>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            {/* Cart Link */}
+            <Link
+              href="/store/cart"
+              className="relative w-10 h-10 flex items-center justify-center text-[#3A3A3A] hover:text-[#B66E41] cursor-pointer"
+            >
+              <FaShoppingCart className="text-xl" />
+              {getItemCount() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-[#D6A400] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {getItemCount()}
+                </span>
+              )}
+            </Link>
 
             {/* Profile Dropdown */}
             <div className="relative" ref={userRef}>
@@ -345,7 +270,6 @@ export default function Navbar() {
                       {user.displayName || 'Profile'}
                     </span>
                   </button>
-
                   <AnimatePresence>
                     {isUserDropdownOpen && (
                       <motion.div
@@ -353,7 +277,7 @@ export default function Navbar() {
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-2 w-48 bg-white  shadow-xl border border-gray-100 py-2 z-50"
+                        className="absolute right-0 mt-2 w-48 bg-white shadow-xl border border-gray-100 py-2 z-50"
                       >
                         <Link href="/account/profile" className="flex items-center space-x-2 px-4 py-2 text-sm text-[#3A3A3A] hover:bg-[#F8F3EC] hover:text-[#B66E41]">
                           <FaUserCircle /> <span>My Profile</span>
@@ -387,7 +311,6 @@ export default function Navbar() {
               onClick={() => {
                 setIsMenuOpen(!isMenuOpen);
                 setIsSearchOpen(false);
-                setIsCartOpen(false);
                 setIsUserDropdownOpen(false);
               }}
               className="lg:hidden w-10 h-10 flex items-center justify-center text-[#3A3A3A] hover:text-[#B66E41] cursor-pointer"
@@ -434,7 +357,7 @@ export default function Navbar() {
                     <Link
                       key={index}
                       href={item.href}
-                      className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-[#3A3A3A] hover:text-[#B66E41] hover:bg-[#F8F3EC]  transition-colors"
+                      className="flex items-center space-x-2 px-3 py-2 text-base font-medium text-[#3A3A3A] hover:text-[#B66E41] hover:bg-[#F8F3EC] transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <span className="text-2xl">

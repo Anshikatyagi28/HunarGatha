@@ -5,7 +5,6 @@ import Link from 'next/link';
 import ArtisanCard from './ArtisanCard';
 import ArtisanFilter from './ArtisanFilter';
 
-
 const artisans = [
   {
     id: 1,

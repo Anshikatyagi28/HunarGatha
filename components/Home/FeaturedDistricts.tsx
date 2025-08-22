@@ -109,7 +109,7 @@ export default function FeaturedDistricts() {
     const scroll = () => {
       if (scrollContainerRef.current && !isPaused) {
         scrollContainerRef.current.scrollLeft += scrollSpeed;
-        
+
         // Reset scroll position to create the infinite loop
         if (scrollContainerRef.current.scrollLeft >= scrollContentRef.current.scrollWidth / 2) {
           scrollContainerRef.current.scrollLeft = 0;
@@ -168,7 +168,7 @@ export default function FeaturedDistricts() {
             Explore by Districts
           </h2>
           <p className="text-lg text-[#de9629] max-w-2xl mx-auto">
-            Discover authentic crafts from India's One District One Product initiative, 
+            Discover authentic crafts from India's One District One Product initiative,
             where each region showcases its unique traditional expertise.
           </p>
         </div>
@@ -181,15 +181,18 @@ export default function FeaturedDistricts() {
               href={`/districts/${district.name.toLowerCase()}`}
               className="group cursor-pointer"
             >
-              <div className="relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+              <div className="relative overflow-hidden rounded-lg bg-white shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+
                 <div className="relative h-64">
                   <img
                     src={district.image}
                     alt={district.craft}
-                    className="w-full h-full object-cover object-top"
+      
+                    className="w-full h-full p-4
+                     object-cover object-top"
                   />
                   <div className={`absolute inset-0 bg-gradient-to-t ${district.color} opacity-20 group-hover:opacity-30 transition-opacity`}></div>
-                  
+
                   {/* District Badge */}
                   <div className="absolute top-4 left-4">
                     <span className="inline-flex items-center px-3 py-1 bg-white/90 backdrop-blur-sm text-[#2C2A4A] text-sm font-semibold rounded-full">
@@ -203,17 +206,17 @@ export default function FeaturedDistricts() {
                   <h3 className="text-2xl font-bold text-[#d28725] mb-2">
                     {district.name}
                   </h3>
-                  <p className="text-[#B66E41] font-semibold text-lg mb-2">
+                  <p className="text-[#B66E41] font-semibold text-md ">
                     {district.craft}
                   </p>
-                  <p className="text-[#3A3A3A] mb-4">
+                  <p className="text-[#3A3A3A] ">
                     {district.description}
                   </p>
-                  
-                  <div className="flex items-center text-[#B66E41] group-hover:text-[#A55A37] font-medium">
+
+                  {/* <div className="flex items-center text-[#B66E41] group-hover:text-[#A55A37] font-medium">
                     Explore Collection
                     <i className="ri-arrow-right-line ml-2 w-4 h-4 flex items-center justify-center group-hover:translate-x-1 transition-transform"></i>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </Link>
