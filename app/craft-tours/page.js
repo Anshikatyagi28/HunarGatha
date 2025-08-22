@@ -11,7 +11,7 @@ const toursData = [
         link: "#", // Replace with actual video link
     },
     {
-        title: "Crafting Itar: Kannauj's Liquid Gold",  
+        title: "Crafting Itar: Kannauj's Liquid Gold",
         district: "Kannauj",
         description: "Witness the ancient deg-bhapka process of extracting natural fragrances to create exquisite itars.",
         image: "https://readdy.ai/api/search-image?query=Traditional%20itar%20making%20process%20in%20a%20Kannauj%20workshop%2C%20large%20copper%20vessels%2C%20distillation%20of%20flowers%2C%20heritage%20craftsmanship&width=400&height=250&seq=itar-tour&orientation=landscape",
@@ -44,8 +44,8 @@ export default function CraftToursPage() {
                     <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
                         Step into the workshops and meet the artisans. These immersive videos reveal the stories and techniques behind each unique craft.
                     </p>
-                </div> 
-            </header>   
+                </div>
+            </header>
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div className="grid md:grid-cols-2 gap-10">
@@ -63,7 +63,7 @@ export default function CraftToursPage() {
                                 <Link href={tour.link} className="w-20 h-20 bg-white/80 rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform">
                                     <i className="ri-play-fill text-4xl text-yellow-600"></i>
                                 </Link>
-                            </div>   
+                            </div>
                             <div className="relative">
                                 <h3 className="font-bold text-2xl text-blue-900 mb-2">{tour.title}</h3>
                                 <p className="text-sm text-gray-500 mb-4">{tour.district}</p>
@@ -75,9 +75,9 @@ export default function CraftToursPage() {
                                     Watch Now <i className="ri-arrow-right-line ml-2"></i>
                                 </Link>
                             </div>
-                        </div> 
+                        </div>
                     ))}
-                </div> 
+                </div>
 
                 <div className="mt-16 text-center">
                     <p className="text-lg text-gray-600 mb-6">Looking for a specific artisan?</p>

@@ -5,7 +5,7 @@ import CategoryFilter from './CategoryFilter';
 import ProductGrid from './ProductGrid';
 import { Filter, Grid2x2, Grid3x3, X } from 'lucide-react';
 import { CiGrid41 } from 'react-icons/ci';
-import { BsLayoutSidebarInsetReverse } from "react-icons/bs";
+import { RxDropdownMenu } from "react-icons/rx";
 import { RiSearchLine } from 'react-icons/ri';
 
 const categories = [
@@ -170,7 +170,7 @@ export default function CategoriesPage() {
                   className="px-4 py-2 bg-[#B66E41] text-white  shadow-md hover:bg-[#8D5832] flex items-center"
                   aria-label="Open categories sidebar"
                 >
-                  <BsLayoutSidebarInsetReverse className="inline-block h-4 w-4 mr-2" />
+                  <RxDropdownMenu className="inline-block h-4 w-4 mr-2" />
                   Categories
                 </button>
               )}
