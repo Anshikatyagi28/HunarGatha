@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import data from '@/data/products.json'
+// import data from '@/data/products.json'
 
 const regions = [
   'All',
@@ -41,16 +41,20 @@ export default function ShopPage() {
   const [priceRange, setPriceRange] = useState([0, 15000]);
   const [showGIOnly, setShowGIOnly] = useState(false);
   const [sortBy, setSortBy] = useState('Featured');
-  const [viewMode, setViewMode] = useState('grid');
+  const [viewMode, setViewMode] = useState<'2' | '3' | '4' | 'list'>('2');
 
-  const [products, setProducts] = useState([]);
+
 
   // Load products from JSON file
+  const [products, setProducts] = useState<any[]>([]);
+
   useEffect(() => {
-    fetch("/data/products.json")
-      .then((res) => res.json())
-      .then((data) => setProducts(data))
-      .catch((err) => console.error("Error loading products.json:", err));
+    fetch("/api/products")
+      .then(res => res.json())
+      .then(data => {
+        setProducts(data);
+        console.log(data);
+      });
   }, []);
 
   // Apply filters
@@ -192,7 +196,7 @@ export default function ShopPage() {
               onClick={() => {
                 setSelectedRegion('All');
                 setSelectedCraft('All');
-                setPriceRange([0, 15000]);
+                setPriceRange([0, 100000]);
                 setShowGIOnly(false);
               }}
               className="w-full bg-amber-100 text-amber-800 px-4 py-2 rounded-lg hover:bg-amber-200 transition-colors cursor-pointer whitespace-nowrap"
@@ -235,20 +239,31 @@ export default function ShopPage() {
 
                   <div className="flex border border-amber-300 rounded-lg overflow-hidden">
                     <button
-                      onClick={() => setViewMode('grid')}
-                      className={`w-10 h-10 flex items-center justify-center ${viewMode === 'grid' ? 'bg-amber-600 text-white' : 'bg-white text-amber-600'
-                        } cursor-pointer`}
+                      onClick={() => setViewMode('2')}
+                      className={`px-3 py-2 text-sm font-medium ${viewMode === '2' ? 'bg-amber-600 text-white' : 'bg-white text-amber-600'}`}
                     >
-                      <i className="ri-grid-line"></i>
+                      2
+                    </button>
+                    <button
+                      onClick={() => setViewMode('3')}
+                      className={`px-3 py-2 text-sm font-medium ${viewMode === '3' ? 'bg-amber-600 text-white' : 'bg-white text-amber-600'}`}
+                    >
+                      3
+                    </button>
+                    <button
+                      onClick={() => setViewMode('4')}
+                      className={`px-3 py-2 text-sm font-medium ${viewMode === '4' ? 'bg-amber-600 text-white' : 'bg-white text-amber-600'}`}
+                    >
+                      4
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`w-10 h-10 flex items-center justify-center ${viewMode === 'list' ? 'bg-amber-600 text-white' : 'bg-white text-amber-600'
-                        } cursor-pointer`}
+                      className={`px-3 py-2 text-sm font-medium ${viewMode === 'list' ? 'bg-amber-600 text-white' : 'bg-white text-amber-600'}`}
                     >
                       <i className="ri-list-unordered"></i>
                     </button>
                   </div>
+
                 </div>
               </div>
             </motion.div>
@@ -258,11 +273,16 @@ export default function ShopPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className={`grid ${viewMode === 'grid'
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
-                : 'grid-cols-1 gap-4'
+              className={`grid gap-6 ${viewMode === '2'
+                ? 'grid-cols-1 sm:grid-cols-2'
+                : viewMode === '3'
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                  : viewMode === '4'
+                    ? 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+                    : 'grid-cols-1' // list view
                 }`}
             >
+
               {sortedProducts.map((product, index) => (
                 <motion.div
                   key={product.slug}

@@ -2,6 +2,8 @@
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
+import logo from '@/public/gaatha-logo.png'
 import {
   FaHome,
   FaMapMarkerAlt,
@@ -30,11 +32,12 @@ import {
   GiShop
 } from 'react-icons/gi';
 import { FiMap } from 'react-icons/fi';
-import useCartStore from '@/stores/cartStore';
-import useWishlistStore from '@/stores/wishlistStore';
+import { useSelector } from 'react-redux';
+import { selectCartItemCount } from '@/store/cartSlice';
+import {  selectWishlistItems } from '@/store/wishlistSlice';
 import { auth, db } from '@/lib/firebase';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot } from '@/lib/firebase';
 
 // Nav items with icon references
 const navItems = [
@@ -103,9 +106,9 @@ export default function Navbar() {
   const dropdownRef = useRef(null);
   const userRef = useRef(null);
   
-  // Use Zustand store for cart data
-  const { getItemCount } = useCartStore();
-  const { items: wishlistItems } = useWishlistStore();
+  // Use Redux store for cart data
+  const cartItemCount = useSelector(selectCartItemCount);
+  const wishlistItems = useSelector(selectWishlistItems);
 
   useEffect(() => {
     // This effect is now only for Firebase user state, not the cart logic.
@@ -149,12 +152,14 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center">
+          <Link href="/" className=" ml-[-10px] flex items-center">
+            <Image src={logo} alt="HunarGaatha Logo" loading='lazy' className=' rounded-full '
+             width={40} height={40} />
             <span className="font-['Pacifico'] text-2xl text-[#B66E41]">HunarGaatha</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-2" onMouseLeave={() => setActiveDropdown(null)}>
+          <nav className="hidden ml-10 lg:flex items-center space-x-2" onMouseLeave={() => setActiveDropdown(null)}>
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
@@ -250,9 +255,9 @@ export default function Navbar() {
               className="relative w-10 h-10 flex items-center justify-center text-[#3A3A3A] hover:text-[#B66E41] cursor-pointer"
             >
               <FaShoppingCart className="text-xl" />
-              {getItemCount() > 0 && (
+              {cartItemCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-[#D6A400] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {getItemCount()}
+                  {cartItemCount}
                 </span>
               )}
             </Link>

@@ -3,13 +3,17 @@ import { motion } from 'framer-motion';
 import { CreditCard, MapPin, User, Phone, Mail, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import useCartStore from '../stores/cartStore';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearCart } from '@/store/cartSlice';
+import { selectCartItems, selectCartTotal } from '@/store/cartSlice';
 import toast from 'react-hot-toast';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
-  const { items, getTotal, clearCart } = useCartStore();
+  const dispatch = useDispatch();
+  const items = useSelector(selectCartItems);
+  const getTotal = useSelector(selectCartTotal);
   
   const [formData, setFormData] = useState({
     // Shipping Address
@@ -47,7 +51,7 @@ const CheckoutPage = () => {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Clear cart and redirect to success page
-      clearCart();
+      dispatch(clearCart());
       toast.success('Order placed successfully!');
       navigate('/order-success');
     } catch (error) {

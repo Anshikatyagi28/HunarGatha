@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { Search, Filter, Grid, List, Heart, Eye, Star, MapPin, ShieldCheck } from 'lucide-react';
 import { bestsellingProducts } from '../data/products';
 import { featuredDistricts } from '../data/districts';
-import useCartStore from '../stores/cartStore';
-import useWishlistStore from '../stores/wishlistStore';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem } from '@/store/cartSlice';
+import { addItem as addToWishlist, removeItem as removeFromWishlist } from '@/store/wishlistSlice';
+import { selectIsInWishlist } from '@/store/wishlistSlice';
 
 const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,8 +16,9 @@ const ProductsPage = () => {
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
 
-  const { addItem } = useCartStore();
-  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
+  const dispatch = useDispatch();
+  
+
 
   const filteredProducts = useMemo(() => {
     let filtered = bestsellingProducts.filter(product => {
@@ -51,15 +54,20 @@ const ProductsPage = () => {
     return filtered;
   }, [searchTerm, selectedDistrict, priceRange, sortBy]);
 
-  const handleWishlistToggle = (product) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product);
-    }
-  };
 
-  const ProductCard = ({ product, isListView = false }) => (
+
+  const ProductCard = ({ product, isListView = false }) => {
+    const isInWishlist = useSelector((state) => selectIsInWishlist(state, product.id));
+    
+    const handleWishlistToggle = () => {
+      if (isInWishlist) {
+        dispatch(removeFromWishlist(product.id));
+      } else {
+        dispatch(addToWishlist(product));
+      }
+    };
+    
+    return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 20 }}
@@ -98,7 +106,7 @@ const ProductsPage = () => {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => handleWishlistToggle(product)}
+            onClick={handleWishlistToggle}
             className={`p-3 rounded-full shadow-lg transition-colors ${
               isInWishlist(product.id)
                 ? 'bg-[#7B2D26] text-white'
@@ -158,7 +166,7 @@ const ProductsPage = () => {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => addItem(product)}
+          onClick={() => dispatch(addItem({ product, quantity: 1 }))}
           className="w-full bg-[#D6A400] text-[#2C2A4A] py-3 rounded-full font-semibold hover:bg-[#B8900A] transition-colors duration-200"
         >
           Add to Cart

@@ -2,7 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import ProductModal from './ProductModal'; // Import your modal component
 
+// Your products data...
 const bestsellingProducts = [
   {
     id: 1,
@@ -120,16 +122,18 @@ const bestsellingProducts = [
 
 export default function BestsellingCrafts() {
   const [wishlist, setWishlist] = useState([2, 5, 8]);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const toggleWishlist = (productId) => {
-    setWishlist(prev => 
-      prev.includes(productId) 
+  const toggleWishlist = (productId: number) => {
+    setWishlist(prev =>
+      prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     );
   };
 
-  const getBadgeColor = (badge) => {
+  const getBadgeColor = (badge: string) => {
     switch (badge) {
       case 'Bestseller': return 'bg-[#D6A400] text-white';
       case 'Heritage': return 'bg-[#4E6E58] text-white';
@@ -143,9 +147,20 @@ export default function BestsellingCrafts() {
     }
   };
 
+  const openModal = (product: any) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
+
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Heading */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-[#2C2A4A] mb-4">
             Bestselling Crafts
@@ -156,11 +171,13 @@ export default function BestsellingCrafts() {
           </p>
         </div>
 
+        {/* Product Grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {bestsellingProducts.map((product) => (
             <div
               key={product.id}
-              className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+              onClick={() => openModal(product)}
+              className="group relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer"
             >
               {/* Product Image */}
               <div className="relative aspect-square overflow-hidden rounded-t-2xl">
@@ -169,7 +186,7 @@ export default function BestsellingCrafts() {
                   alt={product.name}
                   className="w-full h-full object-cover object-top group-hover:scale-110 transition-transform duration-500"
                 />
-                
+
                 {/* Badge */}
                 <div className="absolute top-3 left-3">
                   <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getBadgeColor(product.badge)}`}>
@@ -179,7 +196,10 @@ export default function BestsellingCrafts() {
 
                 {/* Wishlist Button */}
                 <button
-                  onClick={() => toggleWishlist(product.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleWishlist(product.id);
+                  }}
                   className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors cursor-pointer"
                 >
                   <i className={`${wishlist.includes(product.id) ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} w-4 h-4 flex items-center justify-center`}></i>
@@ -196,47 +216,45 @@ export default function BestsellingCrafts() {
 
                 {/* Quick View Overlay */}
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Link
-                    href={`/products/${product.id}`}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModal(product);
+                    }}
                     className="px-6 py-2 bg-white text-[#2C2A4A] font-semibold rounded-lg hover:bg-gray-100 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     Quick View
-                  </Link>
+                  </button>
                 </div>
               </div>
 
               {/* Product Info */}
               <div className="p-4">
                 <div className="mb-2">
-                  <Link
-                    href={`/products/${product.id}`}
-                    className="text-lg font-bold text-[#2C2A4A] hover:text-[#a96615] transition-colors cursor-pointer line-clamp-1"
-                  >
+                  <h3 className="text-lg font-bold text-[#2C2A4A] hover:text-[#a96615] transition-colors line-clamp-1">
                     {product.name}
-                  </Link>
-                  <p className="text-sm text-[#3A3A3A] flex items-center mt-1">
-                    <i className="ri-user-line w-3 h-3 flex items-center justify-center mr-1"></i>
+                  </h3>
+                  <p className="text-sm text-[#3A3A3A] mt-1">
+                    <i className="ri-user-line mr-1"></i>
                     {product.artisan}
                   </p>
-                  <p className="text-sm text-[#a96615] flex items-center">
-                    <i className="ri-map-pin-line w-3 h-3 flex items-center justify-center mr-1"></i>
+                  <p className="text-sm text-[#a96615]">
+                    <i className="ri-map-pin-line mr-1"></i>
                     {product.location}
                   </p>
                 </div>
 
                 {/* Rating */}
                 <div className="flex items-center mb-3">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <i 
-                        key={i}
-                        className={`w-3 h-3 flex items-center justify-center ${i < Math.floor(product.rating) ? 'ri-star-fill text-[#D6A400]' : 'ri-star-line text-gray-300'}`}
-                      ></i>
-                    ))}
-                    <span className="ml-2 text-sm text-[#3A3A3A]">
-                      {product.rating} ({product.reviews})
-                    </span>
-                  </div>
+                  {[...Array(5)].map((_, i) => (
+                    <i
+                      key={i}
+                      className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'ri-star-fill text-[#D6A400]' : 'ri-star-line text-gray-300'}`}
+                    ></i>
+                  ))}
+                  <span className="ml-2 text-sm text-[#3A3A3A]">
+                    {product.rating} ({product.reviews})
+                  </span>
                 </div>
 
                 {/* Price */}
@@ -257,7 +275,7 @@ export default function BestsellingCrafts() {
                 {/* Add to Cart Button */}
                 <button
                   disabled={!product.inStock}
-                  className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap ${
+                  className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors ${
                     product.inStock
                       ? 'bg-[#a96615] text-white hover:bg-[#ca7d1f]'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -274,13 +292,20 @@ export default function BestsellingCrafts() {
         <div className="text-center mt-10">
           <Link
             href="/products"
-            className="inline-flex items-center px-8 py-3 bg-[#a96615] text-white font-semibold rounded-lg hover:bg-[#ca7d1f] transition-colors cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center px-8 py-3 bg-[#a96615] text-white font-semibold rounded-lg hover:bg-[#ca7d1f] transition-colors"
           >
             View All Products
-            <i className="ri-arrow-right-line ml-2 w-4 h-4 flex items-center justify-center"></i>
+            <i className="ri-arrow-right-line ml-2"></i>
           </Link>
         </div>
       </div>
+
+      {/* Product Modal */}
+      <ProductModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
     </section>
   );
-} 
+}

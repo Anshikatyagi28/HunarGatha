@@ -11,18 +11,16 @@ import {
 } from "lucide-react";
 import Link from "next/link"; // Import Link from next/link
 import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
-import useCartStore from "@/stores/cartStore";
+import { useDispatch, useSelector } from 'react-redux';
+import { removeItem, updateQuantity, clearCart } from '@/store/cartSlice';
+import { selectCartItems, selectCartTotal, selectCartItemCount } from '@/store/cartSlice';
 
 const CartPage = () => {
   const router = useRouter(); // Use the useRouter hook for navigation
-  const {
-    items,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    getTotal,
-    getItemCount,
-  } = useCartStore();
+  const dispatch = useDispatch();
+  const items = useSelector(selectCartItems);
+  const getTotal = useSelector(selectCartTotal);
+  const getItemCount = useSelector(selectCartItemCount);
 
   const handleCheckout = () => {
     router.push("/checkout"); // Use router.push() instead of navigate()
@@ -75,7 +73,7 @@ const CartPage = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={clearCart}
+            onClick={() => dispatch(clearCart())}
             className="text-sm px-4 py-2 rounded-full border border-[#7B2D26] text-[#7B2D26] hover:bg-[#7B2D26] hover:text-white transition-colors"
           >
             Clear Cart
@@ -118,7 +116,7 @@ const CartPage = () => {
                   <div className="flex items-center gap-2 bg-[#F8F3EC] rounded-full px-3 py-1">
                     <button
                       onClick={() =>
-                        updateQuantity(item.id, item.quantity - 1)
+                        dispatch(updateQuantity({ productId: item.id, quantity: item.quantity - 1 }))
                       }
                       className="p-1 hover:bg-white rounded-full transition-colors"
                     >
@@ -129,7 +127,7 @@ const CartPage = () => {
                     </span>
                     <button
                       onClick={() =>
-                        updateQuantity(item.id, item.quantity + 1)
+                        dispatch(updateQuantity({ productId: item.id, quantity: item.quantity + 1 }))
                       }
                       className="p-1 hover:bg-white rounded-full transition-colors"
                     >
@@ -149,7 +147,7 @@ const CartPage = () => {
 
                   {/* Remove */}
                   <button
-                    onClick={() => removeItem(item.id)}
+                    onClick={() => dispatch(removeItem(item.id))}
                     className="p-2 hover:bg-[#F8F3EC] rounded-full transition-colors text-[#7B2D26]"
                   >
                     <Trash2 className="h-5 w-5" />

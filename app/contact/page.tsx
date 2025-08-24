@@ -27,18 +27,32 @@ export default function ContactPage() {
 
     emailjs
       .send(
-        'YOUR_SERVICE_ID',
-        'YOUR_TEMPLATE_ID',
+        'service_ab9c1u3',
+        'template_kmqm3uv',
         {
           from_name: formData.name,
           from_email: formData.email,
           subject: formData.subject,
-          message: formData.message
+          message: formData.message,
         },
-        'YOUR_PUBLIC_KEY'
+        'PXATVammMWf7NJpkr'
       )
       .then(
         () => {
+          // ✅ Send auto-reply
+          emailjs.send(
+            'service_ab9c1u3',
+            'template_26n36kr',
+            {
+              to_name: formData.name,
+              to_email: formData.email,
+              subject: formData.subject,
+              message: formData.message,
+              year: new Date().getFullYear()
+            },
+            'PXATVammMWf7NJpkr'
+          );
+
           toast.success('Message sent successfully!');
           setFormData({ name: '', email: '', subject: '', message: '' });
           setLoading(false);
@@ -49,6 +63,7 @@ export default function ContactPage() {
           setLoading(false);
         }
       );
+
   };
 
   const contactMethods = [
@@ -85,7 +100,7 @@ export default function ContactPage() {
       <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
 
       {/* Hero */}
-      
+
       <section className="py-20 bg-gradient-to-br from-amber-0 to-orange-50 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
@@ -125,8 +140,8 @@ export default function ContactPage() {
       {/* Form & Info */}
       <section className="py-20 bg-amber-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-16">
-          
-          
+
+
 
           {/* Additional Info */}
           <motion.div initial={{ opacity: 0, x: 50 }} whileInView={{ opacity: 1, x: 0 }} transition={{ duration: 0.8 }}>
@@ -168,10 +183,10 @@ export default function ContactPage() {
               <form onSubmit={sendEmail} className=" rounded space-y-6">
                 <input type="text" name="name" placeholder="Your Name" required value={formData.name}
                   onChange={handleChange} className="w-full rounded p-3 border border-amber-400 focus:ring-2 focus:ring-amber-500" />
-                
+
                 <input type="email" name="email" placeholder="Your Email" required value={formData.email}
                   onChange={handleChange} className="w-full rounded p-3 border border-amber-400 focus:ring-2 focus:ring-amber-500" />
-                
+
                 <select name="subject" required value={formData.subject}
                   onChange={handleChange} className="w-full rounded p-3 border border-amber-400 focus:ring-2 focus:ring-amber-500">
                   <option value="">Select a subject</option>
