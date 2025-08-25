@@ -14,12 +14,16 @@ import {
   RotateCcw,
   CreditCard
 } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem as addToCart, selectCartItems, selectIsInCart } from '@/store/cartSlice';
+import { addItem as addToWishlist, removeItem as removeFromWishlist, selectWishlistItems, selectIsInWishlist } from '@/store/wishlistSlice';
+import toast from 'react-hot-toast';
 
 interface Product {
   id: number;
   name: string;
-  price: string;
-  originalPrice: string;
+  price: string | number;
+  originalPrice: string | number;
   rating: number;
   reviews: number;
   image: string;
@@ -44,6 +48,14 @@ interface ProductModalProps {
 }
 
 const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose }) => {
+  const dispatch = useDispatch();
+  const cartItems = useSelector(selectCartItems);
+  const wishlistItems = useSelector(selectWishlistItems);
+
+  // Helper functions
+  const isInCart = (productId: number) => cartItems.some((item: any) => item.id === productId);
+  const isInWishlist = (productId: number) => wishlistItems.some((item: any) => item.id === productId);
+
   // Prevent background scroll
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';
@@ -97,14 +109,46 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
 
   // Calculate discount
   const parsePrice = (value: string | number) => {
-  const str = value?.toString() || '0';
-  return parseInt(str.replace(/[₹,]/g, ''), 10);
-};
+    const str = value?.toString() || '0';
+    return parseInt(str.replace(/[₹,]/g, ''), 10);
+  };
+  
   const discountPercent = Math.round(
-  ((parsePrice(enhanced.originalPrice) - parsePrice(enhanced.price)) /
-    parsePrice(enhanced.originalPrice)) *
-    100
-);
+    ((parsePrice(enhanced.originalPrice) - parsePrice(enhanced.price)) /
+      parsePrice(enhanced.originalPrice)) *
+      100
+  );
+
+  // Format price for display
+  const formatPrice = (price: string | number) => {
+    const numPrice = typeof price === 'string' ? parseFloat(price.replace(/[₹,]/g, '')) : price;
+    return `₹${numPrice.toLocaleString()}`;
+  };
+
+  // Handle add to cart
+  const handleAddToCart = () => {
+    if (product) {
+      if (isInCart(product.id)) {
+        toast(`${product.name} is already in cart`);
+      } else {
+        dispatch(addToCart({ product, quantity: 1 }));
+        toast.success(`${product.name} added to cart`);
+      }
+    }
+  };
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = () => {
+    if (product) {
+      if (isInWishlist(product.id)) {
+        dispatch(removeFromWishlist(product.id));
+        toast.success(`${product.name} removed from wishlist`);
+      } else {
+        dispatch(addToWishlist(product));
+        toast.success(`${product.name} added to wishlist`);
+      }
+    }
+  };
 
 
   return (
@@ -135,8 +179,11 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
                 <span className="absolute top-4 left-4 bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-semibold">{enhanced.badge}</span>
-                <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full hover:bg-white transition">
-                  <Heart className="w-5 h-5 text-gray-600 hover:text-red-500" />
+                <button 
+                  onClick={handleWishlistToggle}
+                  className="absolute top-4 right-4 bg-white/90 p-2 rounded-full hover:bg-white transition"
+                >
+                  <Heart className={`w-5 h-5 ${isInWishlist(enhanced.id) ? 'text-red-500 fill-current' : 'text-gray-600'}`} />
                 </button>
               </div>
 
@@ -168,8 +215,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
 
             {/* Price */}
             <div className="flex items-center space-x-4 mb-6">
-              <span className="text-3xl font-bold text-gray-800">{enhanced.price}</span>
-              <span className="text-xl text-gray-500 line-through">{enhanced.originalPrice}</span>
+              <span className="text-3xl font-bold text-gray-800">{formatPrice(enhanced.price)}</span>
+              <span className="text-xl text-gray-500 line-through">{formatPrice(enhanced.originalPrice)}</span>
               <span className="bg-green-100 text-green-800 px-2 py-1 rounded-full text-sm font-semibold">Save {discountPercent}%</span>
             </div>
 
@@ -233,13 +280,23 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
 
             {/* Actions */}
             <div className="space-y-4">
-              <button className="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-amber-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg">
+              <button 
+                onClick={handleAddToCart}
+                className="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-amber-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
+              >
                 <ShoppingCart className="w-5 h-5" />
-                <span>Add to Cart</span>
+                <span>{isInCart(enhanced.id) ? 'Already in Cart' : 'Add to Cart'}</span>
               </button>
-              <button className="w-full bg-white border-2 border-orange-600 text-orange-600 py-4 rounded-xl font-bold text-lg hover:bg-orange-50 transition-all duration-300 flex items-center justify-center space-x-2">
-                <Heart className="w-5 h-5" />
-                <span>Add to Wishlist</span>
+              <button 
+                onClick={handleWishlistToggle}
+                className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-2 ${
+                  isInWishlist(enhanced.id) 
+                    ? 'bg-red-50 border-2 border-red-500 text-red-600 hover:bg-red-100' 
+                    : 'bg-white border-2 border-orange-600 text-orange-600 hover:bg-orange-50'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${isInWishlist(enhanced.id) ? 'fill-current' : ''}`} />
+                <span>{isInWishlist(enhanced.id) ? 'Remove from Wishlist' : 'Add to Wishlist'}</span>
               </button>
             </div>
 

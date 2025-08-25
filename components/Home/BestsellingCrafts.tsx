@@ -2,7 +2,11 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addItem as addToCart, selectCartItems } from '@/store/cartSlice';
+import { addItem as addToWishlist, removeItem as removeFromWishlist, selectWishlistItems, selectIsInWishlist } from '@/store/wishlistSlice';
 import ProductModal from './ProductModal'; // Import your modal component
+import toast from 'react-hot-toast'; // Import toast
 
 // Your products data...
 const bestsellingProducts = [
@@ -121,17 +125,25 @@ const bestsellingProducts = [
 ];
 
 export default function BestsellingCrafts() {
-  const [wishlist, setWishlist] = useState([2, 5, 8]);
+  const dispatch = useDispatch();
+  const cartItems = useSelector(selectCartItems);
+  const wishlistItems = useSelector(selectWishlistItems);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleWishlist = (productId: number) => {
-    setWishlist(prev =>
-      prev.includes(productId)
-        ? prev.filter(id => id !== productId)
-        : [...prev, productId]
-    );
+    const product = bestsellingProducts.find(p => p.id === productId);
+    if (product) {
+      if (wishlistItems.some((item: any) => item.id === productId)) {
+        dispatch(removeFromWishlist(productId));
+      } else {
+        dispatch(addToWishlist(product));
+      }
+    }
   };
+
+  const isInWishlist = (productId: number) => wishlistItems.some((item: any) => item.id === productId);
+  const isInCart = (productId: number) => cartItems.some((item: any) => item.id === productId);
 
   const getBadgeColor = (badge: string) => {
     switch (badge) {
@@ -202,7 +214,7 @@ export default function BestsellingCrafts() {
                   }}
                   className="absolute top-3 right-3 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white transition-colors cursor-pointer"
                 >
-                  <i className={`${wishlist.includes(product.id) ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} w-4 h-4 flex items-center justify-center`}></i>
+                  <i className={`${isInWishlist(product.id) ? 'ri-heart-fill text-red-500' : 'ri-heart-line text-gray-600'} w-4 h-4 flex items-center justify-center`}></i>
                 </button>
 
                 {/* Stock Status */}
@@ -275,13 +287,31 @@ export default function BestsellingCrafts() {
                 {/* Add to Cart Button */}
                 <button
                   disabled={!product.inStock}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (product.inStock) {
+                      if (isInCart(product.id)) {
+                        toast(`${product.name} is already in cart`);
+                      } else {
+                        dispatch(addToCart({ product, quantity: 1 }));
+                        toast.success(`${product.name} added to cart`);
+                      }
+                    }
+                  }}
                   className={`w-full py-2 px-4 rounded-lg font-semibold transition-colors ${
                     product.inStock
-                      ? 'bg-[#a96615] text-white hover:bg-[#ca7d1f]'
+                      ? isInCart(product.id)
+                        ? 'bg-gray-500 text-white cursor-not-allowed'
+                        : 'bg-[#a96615] text-white hover:bg-[#ca7d1f]'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  {product.inStock ? 'Add to Cart' : 'Notify When Available'}
+                  {product.inStock 
+                    ? isInCart(product.id) 
+                      ? 'Already in Cart' 
+                      : 'Add to Cart'
+                    : 'Notify When Available'
+                  }
                 </button>
               </div>
             </div>
