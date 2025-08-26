@@ -9,21 +9,34 @@ import {
   ShoppingBag,
   ArrowLeft,
 } from "lucide-react";
-import Link from "next/link"; // Import Link from next/link
-import { useRouter } from "next/navigation"; // Import useRouter from next/navigation
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from 'react-redux';
 import { removeItem, updateQuantity, clearCart } from '@/store/cartSlice';
 import { selectCartItems, selectCartTotal, selectCartItemCount } from '@/store/cartSlice';
+import toast from 'react-hot-toast'; // Import toast for notifications
 
 const CartPage = () => {
-  const router = useRouter(); // Use the useRouter hook for navigation
+  const router = useRouter();
   const dispatch = useDispatch();
+
+  // Correctly use useSelector to get the values from the state
   const items = useSelector(selectCartItems);
-  const getTotal = useSelector(selectCartTotal);
-  const getItemCount = useSelector(selectCartItemCount);
+  const total = useSelector(selectCartTotal);
+  const itemCount = useSelector(selectCartItemCount);
 
   const handleCheckout = () => {
-    router.push("/checkout"); // Use router.push() instead of navigate()
+    router.push("/checkoutform");
+  };
+
+  const handleRemoveItem = (id, name) => {
+    dispatch(removeItem(id));
+    toast.success(`${name} removed from cart`);
+  };
+
+  const handleClearCart = () => {
+    dispatch(clearCart());
+    toast.success('Cart cleared');
   };
 
   if (items.length === 0) {
@@ -42,7 +55,7 @@ const CartPage = () => {
             Discover unique handcrafted products from skilled artisans.
           </p>
           <Link
-            href="/products" // Use href prop instead of to
+            href="/products"
             className="inline-flex items-center justify-center bg-[#D6A400] text-[#2C2A4A] px-8 py-3 rounded-full font-semibold text-lg hover:bg-[#B8900A] transition-colors shadow-md"
           >
             Start Shopping
@@ -59,10 +72,10 @@ const CartPage = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 gap-4">
           <div>
             <h1 className="text-3xl font-bold text-[#2C2A4A]">
-              Shopping Cart ({getItemCount()} items)
+              Shopping Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})
             </h1>
             <Link
-              href="/products" // Use href prop instead of to
+              href="/products"
               className="mt-2 inline-flex items-center text-[#B66E41] hover:text-[#8B5633] transition-colors text-sm font-medium"
             >
               <ArrowLeft className="h-4 w-4 mr-1" />
@@ -73,7 +86,7 @@ const CartPage = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => dispatch(clearCart())}
+            onClick={handleClearCart}
             className="text-sm px-4 py-2 rounded-full border border-[#7B2D26] text-[#7B2D26] hover:bg-[#7B2D26] hover:text-white transition-colors"
           >
             Clear Cart
@@ -147,7 +160,7 @@ const CartPage = () => {
 
                   {/* Remove */}
                   <button
-                    onClick={() => dispatch(removeItem(item.id))}
+                    onClick={() => handleRemoveItem(item.id, item.name)}
                     className="p-2 hover:bg-[#F8F3EC] rounded-full transition-colors text-[#7B2D26]"
                   >
                     <Trash2 className="h-5 w-5" />
@@ -168,7 +181,7 @@ const CartPage = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-700">Subtotal</span>
                   <span className="font-semibold">
-                    ₹{getTotal().toLocaleString()}
+                    ₹{total.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -178,14 +191,14 @@ const CartPage = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-700">Tax (18%)</span>
                   <span className="font-semibold">
-                    ₹{Math.round(getTotal() * 0.18).toLocaleString()}
+                    ₹{Math.round(total * 0.18).toLocaleString()}
                   </span>
                 </div>
                 <hr className="border-gray-200" />
                 <div className="flex justify-between text-base font-bold text-[#2C2A4A]">
                   <span>Total</span>
                   <span>
-                    ₹{Math.round(getTotal() * 1.18).toLocaleString()}
+                    ₹{Math.round(total * 1.18).toLocaleString()}
                   </span>
                 </div>
               </div>
