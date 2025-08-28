@@ -11,11 +11,23 @@ import {
   Lock,
 } from "lucide-react";
 import { useDispatch, useSelector } from 'react-redux';
-import { selectCartItems, selectCartTotal } from '@/store/cartSlice';
-import { createStripeCheckoutSession, redirectToStripeCheckout, createRazorpayOrder, openRazorpayCheckout } from "@/lib/payment";
+import { selectCartItems, selectCartTotal, clearCart } from '@/store/cartSlice';
+import { createRazorpayOrder, openRazorpayCheckout } from "@/lib/payment";
+
+type InputChangeEvent = React.ChangeEvent<HTMLInputElement>;
+type TextChangeEvent = React.ChangeEvent<HTMLTextAreaElement>;
+
+interface InputWithIconProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: InputChangeEvent) => void;
+  icon?: React.ReactNode;
+  type?: string;
+}
 
 // Assuming these are defined elsewhere
-const InputWithIcon = ({ label, name, value, onChange, icon, type = "text" }) => (
+const InputWithIcon = ({ label, name, value, onChange, icon, type = "text" }: InputWithIconProps) => (
   <div>
     <label className="block text-sm font-medium text-[#2C2A4A] mb-2">{label}</label>
     <div className="relative">
@@ -32,7 +44,17 @@ const InputWithIcon = ({ label, name, value, onChange, icon, type = "text" }) =>
   </div>
 );
 
-const InputSimple = ({ label, name, value, onChange, type = "text", placeholder = "", className = "" }) => (
+interface InputSimpleProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: InputChangeEvent) => void;
+  type?: string;
+  placeholder?: string;
+  className?: string;
+}
+
+const InputSimple = ({ label, name, value, onChange, type = "text", placeholder = "", className = "" }: InputSimpleProps) => (
   <div className={className}>
     <label className="block text-sm font-medium text-[#2C2A4A] mb-2">{label}</label>
     <input
@@ -47,7 +69,14 @@ const InputSimple = ({ label, name, value, onChange, type = "text", placeholder 
   </div>
 );
 
-const SummaryRow = ({ label, value, bold = false, highlight = false }) => (
+interface SummaryRowProps {
+  label: string;
+  value: number | string;
+  bold?: boolean;
+  highlight?: boolean;
+}
+
+const SummaryRow = ({ label, value, bold = false, highlight = false }: SummaryRowProps) => (
   <div className={`flex justify-between ${bold ? "text-xl font-bold text-[#2C2A4A]" : ""}`}>
     <span className="text-[#3A3A3A]">{label}</span>
     <span className={`${highlight ? "text-[#4E6E58] font-semibold" : "font-semibold"}`}>
@@ -69,13 +98,13 @@ export default function CheckoutPage() {
     city: "",
     state: "",
     pincode: "",
-    paymentMethod: "stripe", // Changed default to Stripe
+    paymentMethod: "razorpay",
   });
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e) => {
+  const handleChange = (e: InputChangeEvent | TextChangeEvent) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -86,27 +115,24 @@ export default function CheckoutPage() {
     const paymentInfo = {
       name: formData.fullName,
       email: formData.email,
-      phone: formData.phone,
-      address: {
-        line1: formData.address,
-        city: formData.city,
-        state: formData.state,
-        postal_code: formData.pincode,
-        country: 'IN', // Assuming India based on INR
-      },
-    };
+      contact: formData.phone,
+    } as any;
 
     try {
-      if (formData.paymentMethod === "stripe") {
-        const session = await createStripeCheckoutSession({
-          items,
-          customer_details: paymentInfo,
+      if (formData.paymentMethod === "razorpay") {
+        const order = await createRazorpayOrder({ amount: total, currency: "INR" });
+        const result: any = await openRazorpayCheckout(order, paymentInfo);
+        // Verify signature on server
+        const verifyRes = await fetch('/api/razorpay/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(result)
         });
-        await redirectToStripeCheckout(session.id);
-      } else if (formData.paymentMethod === "razorpay") {
-        const order = await createRazorpayOrder(subtotal * 100, "INR"); // Razorpay uses smallest currency unit
-        const result = await openRazorpayCheckout(order, paymentInfo);
-        console.log("✅ Razorpay Payment Result:", result);
+        if (!verifyRes.ok) throw new Error('Signature verification failed');
+        const { valid } = await verifyRes.json();
+        if (!valid) throw new Error('Invalid payment');
+        console.log("✅ Razorpay Payment Verified:", result);
+        dispatch(clearCart());
         alert("✅ Order placed successfully!");
       } else {
         // Handle COD or other methods
@@ -173,7 +199,7 @@ export default function CheckoutPage() {
                 Payment Method
               </h2>
               <div className="space-y-4 mb-6">
-                {["stripe", "razorpay", "cod"].map((method) => (
+                {["razorpay", "cod"].map((method) => (
                   <label key={method} className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="radio"
@@ -183,9 +209,7 @@ export default function CheckoutPage() {
                       onChange={handleChange}
                       className="text-[#B66E41]"
                     />
-                    <span className="capitalize">
-                      {method === "cod" ? "Cash on Delivery" : method === "stripe" ? "Stripe" : "Razorpay"}
-                    </span>
+                    <span className="capitalize">{method === "cod" ? "Cash on Delivery" : "Razorpay"}</span>
                   </label>
                 ))}
               </div>
@@ -197,7 +221,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-2xl shadow-lg p-6 sticky top-24">
               <h2 className="text-xl font-bold text-[#2C2A4A] mb-6">Order Summary</h2>
               <div className="space-y-4 mb-6">
-                {items.map((item) => (
+                {items.map((item: any) => (
                   <div key={item.id} className="flex items-center gap-3">
                     <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
                     <div className="flex-1">

@@ -24,6 +24,7 @@ import {
   FaBars,
   FaHeart,
   FaChevronDown,
+  FaUserPlus
 } from 'react-icons/fa';
 import {
   GiPerfumeBottle,
@@ -96,6 +97,7 @@ const navItems: NavItem[] = [
       { name: 'Who we are', href: '/about', icon: FaUsers },
       { name: 'Our Values', href: '/about/values', icon: FaAward },
       { name: 'What We do', href: '/about/whatwedo', icon: FaBriefcase },
+      { name: 'Be our Part', href: '/about/beapart', icon: FaUserPlus },
       { name: 'Contact Us', href: '/contact', icon: FaPhone },
     ],
   },

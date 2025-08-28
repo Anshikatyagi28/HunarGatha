@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 // import data from '@/data/products.json'
+import ProductModal from '@/components/Home/ProductModal';
 
 const regions = [
   'All',
@@ -42,6 +43,8 @@ export default function ShopPage() {
   const [showGIOnly, setShowGIOnly] = useState(false);
   const [sortBy, setSortBy] = useState('Featured');
   const [viewMode, setViewMode] = useState<'2' | '3' | '4' | 'list'>('2');
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
 
 
@@ -56,6 +59,16 @@ export default function ShopPage() {
         console.log(data);
       });
   }, []);
+
+  const openModal = (product: any) => {
+    setSelectedProduct(product);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedProduct(null);
+  };
 
   // Apply filters
   const filteredProducts = products.filter((product) => {
@@ -88,18 +101,27 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-amber-800 to-amber-600 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section
+        className="relative bg-cover bg-center bg-no-repeat py-16"
+        style={{
+          backgroundImage:
+            "url('https://plus.unsplash.com/premium_photo-1679868095924-f7f354ad2862?w=1200&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aGFuZGNyYWZ0fGVufDB8fDB8fHww')",
+        }}
+      >
+        {/* Overlay gradient for readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-900/80 to-amber-600/70"></div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-white mb-4">
+            <h1 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-white mb-4 drop-shadow-lg">
               Craft Collection
             </h1>
-            <p className="text-xl text-amber-100 max-w-2xl mx-auto">
+            <p className="text-xl text-amber-100 max-w-2xl mx-auto drop-shadow-md">
               Discover authentic handcrafted products directly from master artisans across India
             </p>
           </motion.div>
@@ -293,9 +315,9 @@ export default function ShopPage() {
                   className={` py-2 overflow-hidden group cursor-pointer hover:shadow-2xl px-4 transition-all duration-300 
     ${viewMode === 'list' ? 'flex flex-row' : 'flex flex-col'}
   `}
+                  onClick={() => openModal(product)}
                 >
                   <div className="flex flex-row ">
-                    <Link href={`/product/${product.slug}`}>
                       <div
                         className={`overflow-hidden rounded-xl ${viewMode === 'list' ? 'w-48 h-48 mr-4 ' : 'h-64 w-full mb-4'
                           }`}
@@ -356,7 +378,6 @@ export default function ShopPage() {
                           </div>
                         </div>
                       </div>
-                    </Link>
                   </div>
                 </motion.div>
 
@@ -392,6 +413,12 @@ export default function ShopPage() {
           </div>
         </div>
       </div>
+      {/* Product Modal */}
+      <ProductModal
+        product={selectedProduct}
+        isOpen={isModalOpen}
+        onClose={closeModal}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
-import { GiHandsHelping, GiFlowerPot, GiHandShake, GiEarthAmerica } from 'react-icons/gi';
+import {  GiFlowerPot, GiEarthAmerica } from 'react-icons/gi';
+import {HeartHandshake, HandHelping } from 'lucide-react'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -9,7 +10,7 @@ const fadeUp = {
 
 const VALUES = [
   {
-    icon: <GiHandsHelping className="text-[#B66E41] text-5xl" />,
+    icon: <HandHelping className="text-[#B66E41] text-5xl" />,
     title: 'Empowerment',
     description: 'Supporting artisans with fair pay, training, and lasting economic growth.',
   },
@@ -19,7 +20,7 @@ const VALUES = [
     description: 'Safeguarding traditional crafts and sharing the stories that shape our culture.',
   },
   {
-    icon: <GiHandShake className="text-[#4E6E58] text-5xl" />,
+    icon: <HeartHandshake  className="text-[#4E6E58] text-5xl" />,
     title: 'Partnership',
     description: 'Collaborating closely with artisans, communities, and craft lovers.',
   },

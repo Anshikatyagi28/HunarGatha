@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Star,
@@ -12,11 +12,15 @@ import {
   Package,
   Truck,
   RotateCcw,
-  CreditCard
+  CreditCard,
+  Zap
 } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addItem as addToCart, selectCartItems, selectIsInCart } from '@/store/cartSlice';
 import { addItem as addToWishlist, removeItem as removeFromWishlist, selectWishlistItems, selectIsInWishlist } from '@/store/wishlistSlice';
+import { useAuth } from '@/contexts/AuthContext';
+import RazorpayPayment from '@/components/Payment/RazorpayPayment';
+import { PaymentItem } from '@/lib/payment';
 import toast from 'react-hot-toast';
 
 interface Product {
@@ -51,6 +55,8 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
   const dispatch = useDispatch();
   const cartItems = useSelector(selectCartItems);
   const wishlistItems = useSelector(selectWishlistItems);
+  const { currentUser } = useAuth();
+  const [showPayment, setShowPayment] = useState(false);
 
   // Helper functions
   const isInCart = (productId: number) => cartItems.some((item: any) => item.id === productId);
@@ -148,6 +154,60 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
         toast.success(`${product.name} added to wishlist`);
       }
     }
+  };
+
+  // Handle buy now
+  const handleBuyNow = () => {
+    if (!currentUser) {
+      toast.error('Please login to continue with purchase');
+      return;
+    }
+    setShowPayment(true);
+  };
+
+  // Handle payment success
+  const handlePaymentSuccess = async (paymentData: any) => {
+    try {
+      // Save order to database
+      const orderData = {
+        orderId: paymentData.orderId,
+        razorpayPaymentId: paymentData.razorpay_payment_id,
+        razorpayOrderId: paymentData.razorpay_order_id,
+        customerId: currentUser?.uid,
+        customerEmail: currentUser?.email,
+        customerName: currentUser?.displayName,
+        items: paymentData.items,
+        amount: paymentData.amount,
+        status: 'confirmed',
+        paymentStatus: 'paid',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save to Firestore
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      });
+
+      if (response.ok) {
+        toast.success('Order placed successfully!');
+        setShowPayment(false);
+        onClose();
+      } else {
+        throw new Error('Failed to save order');
+      }
+    } catch (error) {
+      console.error('Error saving order:', error);
+      toast.error('Order placed but failed to save details. Please contact support.');
+    }
+  };
+
+  // Handle payment failure
+  const handlePaymentFailure = (error: any) => {
+    console.error('Payment failed:', error);
+    setShowPayment(false);
   };
 
 
@@ -281,6 +341,13 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
             {/* Actions */}
             <div className="space-y-4">
               <button 
+                onClick={handleBuyNow}
+                className="w-full bg-gradient-to-r from-[#B66E41] to-[#A05A2E] text-white py-4 rounded-xl font-bold text-lg hover:from-[#A05A2E] hover:to-[#8B4A1F] transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
+              >
+                <Zap className="w-5 h-5" />
+                <span>Buy Now</span>
+              </button>
+              <button 
                 onClick={handleAddToCart}
                 className="w-full bg-gradient-to-r from-orange-600 to-amber-600 text-white py-4 rounded-xl font-bold text-lg hover:from-orange-700 hover:to-amber-700 transition-all duration-300 flex items-center justify-center space-x-2 shadow-lg"
               >
@@ -304,11 +371,29 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
             <div className="border-t pt-6 space-y-4">
               <div className="flex items-center space-x-3"><Truck className="w-5 h-5 text-green-600" /><span className="text-sm text-gray-700">Free delivery on orders above ₹999</span></div>
               <div className="flex items-center space-x-3"><RotateCcw className="w-5 h-5 text-blue-600" /><span className="text-sm text-gray-700">7-day easy returns</span></div>
-              <div className="flex items-center space-x-3"><CreditCard className="w-5 h-5 text-purple-600" /><span className="text-sm text-gray-700">COD & UPI payments accepted</span></div>
+              <div className="flex items-center space-x-3"><CreditCard className="w-5 h-5 text-purple-600" /><span className="text-sm text-gray-700">Secure payments via Razorpay</span></div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      {showPayment && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <RazorpayPayment
+            items={[{
+              id: enhanced.id.toString(),
+              name: enhanced.name,
+              price: parsePrice(enhanced.price),
+              quantity: 1,
+              image: enhanced.image
+            }]}
+            onPaymentSuccess={handlePaymentSuccess}
+            onPaymentFailure={handlePaymentFailure}
+            onClose={() => setShowPayment(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };

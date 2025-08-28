@@ -8,6 +8,7 @@ import { CiGrid41 } from 'react-icons/ci';
 import { RxDropdownMenu } from 'react-icons/rx';
 import { RiSearchLine } from 'react-icons/ri';
 import Head from 'next/head';
+import Link from 'next/link';
 
 // =================================================================
 // TYPE DEFINITIONS AND DATA
@@ -207,9 +208,9 @@ const CategoriesPage: FC = () => {
 
             <div className="py-4 space-y-2">
               {categories.map((category) => (
-                <button
+                <Link
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id)}
+                  href={`/categories/${category.id}`}
                   className={`flex w-full items-center space-x-3 px-4 py-2 text-left transition-all rounded-lg
                     ${selectedCategory === category.id
                       ? 'bg-[#B66E41] text-white shadow-md'
@@ -224,7 +225,7 @@ const CategoriesPage: FC = () => {
                   }`}>
                     {category.count}
                   </span>
-                </button>
+                </Link>
               ))}
             </div>
 

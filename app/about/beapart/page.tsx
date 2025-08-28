@@ -1,7 +1,7 @@
 'use client';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { GiHandHeart, GiHandShake } from 'react-icons/gi';
+import { GiChainedHeart, GiHandSaw } from 'react-icons/gi';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -10,12 +10,12 @@ const fadeUp = {
 
 const STEPS = [
   {
-    icon: <GiHandHeart className="text-[#B66E41] text-5xl" />,
+    icon: <GiChainedHeart className="text-[#B66E41] text-5xl" />,
     title: 'Connect with Artisans',
     description: 'Join a community that uplifts culture through craft and story.',
   },
   {
-    icon: <GiHandShake className="text-[#4E6E58] text-5xl" />,
+    icon: <GiHandSaw className="text-[#4E6E58] text-5xl" />,
     title: 'Collaborate & Create',
     description: 'Work with artisans to bring heritage crafts to life for modern homes.',
   },

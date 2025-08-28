@@ -26,7 +26,7 @@ const CartPage = () => {
   const itemCount = useSelector(selectCartItemCount);
 
   const handleCheckout = () => {
-    router.push("/checkoutform");
+    router.push("/store/checkoutform");
   };
 
   const handleRemoveItem = (id, name) => {

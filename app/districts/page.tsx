@@ -100,9 +100,9 @@ export default function DistrictsPage() {
                     </div>
                     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {districtsData.map((district) => (
-                            <div
+                            <Link
                                 key={district.id}
-                                onClick={() => setSelectedDistrict(district)}
+                                href={`/districts/${district.id}`}
                                 className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer p-6 transform hover:scale-105 ${
                                     selectedDistrict?.id === district.id ? 'ring-4 ring-yellow-400' : ''
                                 }`}
@@ -128,7 +128,7 @@ export default function DistrictsPage() {
                                         {district.industryType}
                                     </span>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
